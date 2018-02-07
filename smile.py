@@ -1,6 +1,7 @@
 import numpy as np
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Flatten, Reshape
+from keras.layers import Conv2D, MaxPooling2D
 from keras.utils import np_utils
 from wandb.wandb_keras import WandbKerasCallback
 import wandb
@@ -25,12 +26,19 @@ img_rows, img_cols = train_X.shape[1:]
 test_X = test_X.reshape(test_X.shape[0], test_X.shape[1], test_X.shape[2], 1)
 train_X = train_X.reshape(train_X.shape[0], train_X.shape[1], train_X.shape[2], 1)
 
-#train_X /= 255.0
-#test_X /= 255.0
+train_X /= 255.0
+test_X /= 255.0
 
 model = Sequential()
-model.add(Flatten(input_shape=(img_rows, img_cols,1)))
+model.add(Conv2D(32,
+	(3, 3),
+	input_shape=(img_rows, img_cols,1),
+	activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Flatten())
+model.add(Dense(100, activation='relu'))
 model.add(Dense(num_classes, activation='softmax') )
+
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 model.fit(train_X, train_y,
